@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Streamline Belt Pro | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen p-4 md:p-6 select-none">
+
+    <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-slate-800 pb-4">
+        <div class="text-center md:text-left">
+            <h1 class="text-2xl font-black tracking-tighter text-cyan-400 italic">STREAMLINE <span class="text-white text-3xl">BELT</span></h1>
+            <div class="flex items-center gap-2 justify-center md:justify-start">
+                <span id="status-indicator" class="w-2 h-2 bg-slate-600 rounded-full"></span>
+                <p id="session-info" class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Sistem Ready</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4 bg-slate-900 p-3 px-5 rounded-2xl border border-slate-800 shadow-2xl">
+            <div class="text-center pr-4 border-r border-slate-800">
+                <p class="text-[8px] text-slate-500 uppercase font-bold mb-1">Durasi Sesi</p>
+                <p id="timer" class="text-3xl font-black text-white mono leading-none">00:00</p>
+            </div>
+            <div id="recording-ui" class="hidden flex flex-col items-center gap-1">
+                <span class="w-3 h-3 bg-red-600 rounded-full animate-pulse shadow-[0_0_10px_#dc2626]"></span>
+                <span class="text-[9px] font-black text-red-500">REC</span>
+            </div>
+        </div>
+    </header>
+
+    <section id="setup-panel" class="mb-6 glass-card p-4">
+        <p class="label mb-3 text-cyan-500">Mode Latihan Saat Ini:</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <button onclick="selectMode('Gaya Bebas', this)" class="mode-btn active">Gaya Bebas</button>
+            <button onclick="selectMode('Gaya Dada', this)" class="mode-btn">Gaya Dada</button>
+            <button onclick="selectMode('Kupu-Kupu', this)" class="mode-btn">Kupu-Kupu</button>
+            <button onclick="selectMode('Glide Test', this)" class="mode-btn">Glide Test</button>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 mb-8">
+        <button id="btn-start" class="btn-action bg-cyan-600 text-white shadow-lg shadow-cyan-900/40 border-b-4 border-cyan-800">
+            <span class="text-[9px] opacity-60">START / RESUME</span>
+            <span class="text-xs font-black tracking-widest">MULAI</span>
+        </button>
+        
+        <button id="btn-pause" class="btn-action bg-slate-900 text-slate-600 opacity-30 cursor-not-allowed border-b-4 border-slate-800" disabled>
+            <span class="text-[9px] opacity-60">HOLD DATA</span>
+            <span class="text-xs font-black tracking-widest">PAUSE</span>
+        </button>
+        
+        <button id="btn-stop" class="btn-action bg-slate-900 text-slate-600 opacity-30 cursor-not-allowed border-b-4 border-slate-800" disabled>
+            <span class="text-[9px] opacity-60">FINISH SESSION</span>
+            <span class="text-xs font-black tracking-widest">BERHENTI</span>
+        </button>
+        
+        <button id="btn-download" class="btn-action bg-slate-900 text-slate-600 opacity-30 cursor-not-allowed border-b-4 border-slate-800" disabled>
+            <span class="text-[9px] opacity-60">EXPORT CSV</span>
+            <span class="text-xs font-black tracking-widest">UNDUH DATA</span>
+        </button>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-8 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-6 flex flex-col items-center justify-center relative overflow-hidden">
+                    <h3 class="label absolute top-4 left-4">Streamline Efficiency</h3>
+                    <div class="w-44 h-44 relative flex items-center justify-center mt-4">
+                        <canvas id="gaugeChart"></canvas>
+                        <span id="score-text" class="absolute text-6xl font-black italic tracking-tighter text-white">0</span>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 flex flex-col justify-between">
+                    <h3 class="label mb-4">Analisis Gerakan (Live)</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl">
+                            <span class="text-xs font-bold text-emerald-400">OPTIMAL</span>
+                            <span id="cnt-good" class="text-3xl font-black text-emerald-400 mono">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-red-500/10 border border-red-500/30 rounded-2xl">
+                            <span class="text-xs font-bold text-red-400">PELANGGARAN</span>
+                            <span id="cnt-bad" class="text-3xl font-black text-red-400 mono">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="label">Waveform Real-Time</h3>
+                    <div class="flex gap-4">
+                        <span class="text-[9px] flex items-center gap-1 font-bold"><span class="w-2 h-2 bg-cyan-400 rounded-full"></span> PITCH</span>
+                        <span class="text-[9px] flex items-center gap-1 font-bold"><span class="w-2 h-2 bg-white rounded-full"></span> ROLL</span>
+                    </div>
+                </div>
+                <div class="h-60">
+                    <canvas id="waveChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-4 space-y-6">
+            <div class="glass-card p-5">
+                <h3 class="label mb-6">Visual Posture Tilt</h3>
+                <div class="bg-black/40 h-32 rounded-2xl flex items-center justify-center relative">
+                    <div id="body-model" class="w-48 h-3 bg-cyan-400 rounded-full shadow-[0_0_25px_rgba(34,211,238,0.6)] transition-transform duration-100"></div>
+                    <div class="absolute w-full h-[1px] bg-slate-800"></div> </div>
+                <div class="flex justify-around mt-4 text-center">
+                    <div>
+                        <p class="text-[8px] text-slate-500">PITCH</p>
+                        <p id="val-pitch" class="text-xl font-bold mono text-cyan-400">0.0°</p>
+                    </div>
+                    <div>
+                        <p class="text-[8px] text-slate-500">ROLL</p>
+                        <p id="val-roll" class="text-xl font-bold mono text-white">0.0°</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-5 h-[340px] flex flex-col">
+                <h3 class="label mb-4">Riwayat Sesi Latihan</h3>
+                <div id="session-list" class="flex-1 overflow-y-auto space-y-2 pr-2">
+                    <p class="text-[10px] text-slate-600 italic text-center py-10">Belum ada data sesi.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-recap" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-6">
+        <div class="glass-card w-full max-w-sm p-8 border-cyan-500 shadow-2xl">
+            <h2 id="recap-title" class="text-2xl font-black text-cyan-400 mb-6 uppercase italic">Ringkasan Sesi</h2>
+            <div id="recap-content" class="space-y-4 mb-8 text-sm border-y border-slate-800 py-6"></div>
+            <button onclick="closeModal()" class="w-full py-4 bg-cyan-600 rounded-2xl font-black uppercase text-xs hover:bg-cyan-500 active:scale-95 transition-all">SIMPAN & RESET SISTEM</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

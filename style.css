@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;800&display=swap');
+
+body { 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    overscroll-behavior: none;
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+.glass-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+}
+
+.label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #475569;
+}
+
+.mode-btn {
+    padding: 12px 6px;
+    border-radius: 14px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+    background: rgba(34, 211, 238, 0.1);
+    border-color: #22d3ee;
+    color: #22d3ee;
+    box-shadow: 0 0 15px rgba(34, 211, 238, 0.1);
+}
+
+.btn-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    min-height: 70px;
+}
+
+/* State Aktif Tombol */
+.btn-on-pause {
+    background: #1e293b !important;
+    color: #fbbf24 !important;
+    border-color: #fbbf24 !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2) !important;
+}
+
+.btn-on-stop {
+    background: #1e293b !important;
+    color: #ef4444 !important;
+    border-color: #ef4444 !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2) !important;
+}
+
+.btn-on-download {
+    background: #1e293b !important;
+    color: #10b981 !important;
+    border-color: #10b981 !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2) !important;
+}
+
+.btn-action:active:not(:disabled) {
+    transform: scale(0.92) translateY(2px);
+    border-bottom-width: 0px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }

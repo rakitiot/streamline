@@ -97,38 +97,42 @@ btnStop.onclick = () => {
 };
 
 function processStream() {
-    // Simulasi sensor IMU
-    const p = (Math.sin(Date.now() / 600) * 12 + (Math.random() * 3)).toFixed(1);
-    const r = (Math.cos(Date.now() / 800) * 8).toFixed(1);
-    const score = Math.max(0, 100 - (Math.abs(p) * 2.5 + Math.abs(r))).toFixed(0);
+    // 1. Simulasi Raw Data Sensor
+    let p = parseFloat((Math.sin(Date.now() / 600) * 12 + (Math.random() * 3)).toFixed(1));
+    let r = parseFloat((Math.cos(Date.now() / 800) * 8).toFixed(1));
+    
+    // 2. Logika Khusus Gaya Punggung
+    // Pada gaya punggung, posisi ideal adalah terlentang (biasanya dibaca 180 derajat)
+    // Di sini kita asumsikan sensor dikalibrasi agar '0' tetap posisi streamline datar
+    let currentScore;
+    
+    if (selectedMode === "Gaya Punggung") {
+        // Toleransi roll lebih ketat karena menjaga keseimbangan terlentang lebih sulit
+        currentScore = Math.max(0, 100 - (Math.abs(p) * 3 + Math.abs(r) * 2)).toFixed(0);
+    } else {
+        // Mode gaya lain (bebas, dada, kupu)
+        currentScore = Math.max(0, 100 - (Math.abs(p) * 2.5 + Math.abs(r))).toFixed(0);
+    }
 
-    // Hitung Poin
-    if (score > 85) cntGood++;
-    if (score < 45) cntBad++;
+    // 3. Hitung Poin Pelanggaran/Optimal
+    if (currentScore > 85) cntGood++;
+    if (currentScore < 45) cntBad++;
 
-    // Record data ke RAM
-    currentSessionData.push({ t: seconds, p, r, s: score });
+    // 4. Simpan ke RAM untuk CSV
+    currentSessionData.push({ t: seconds, p, r, s: currentScore });
 
-    // Update UI Elements
+    // 5. Update UI
     document.getElementById('val-pitch').innerText = p + '°';
     document.getElementById('val-roll').innerText = r + '°';
-    document.getElementById('score-text').innerText = score;
+    document.getElementById('score-text').innerText = currentScore;
     document.getElementById('cnt-good').innerText = cntGood;
     document.getElementById('cnt-bad').innerText = cntBad;
+    
+    // Efek visual rotasi model tubuh
     document.getElementById('body-model').style.transform = `rotate(${p}deg)`;
 
-    // Update Graphs
-    waveChart.data.datasets[0].data.push(p);
-    waveChart.data.datasets[1].data.push(r);
-    if(waveChart.data.datasets[0].data.length > 40) {
-        waveChart.data.datasets[0].data.shift();
-        waveChart.data.datasets[1].data.shift();
-    }
-    waveChart.update('none');
-
-    gaugeChart.data.datasets[0].data = [score, 100 - score];
-    gaugeChart.data.datasets[0].backgroundColor[0] = score > 80 ? '#22d3ee' : (score > 45 ? '#fbbf24' : '#ef4444');
-    gaugeChart.update('none');
+    // 6. Update Grafik
+    updateCharts(p, r, currentScore);
 }
 
 function updateUI() {
